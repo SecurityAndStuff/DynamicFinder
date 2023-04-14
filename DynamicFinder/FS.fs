@@ -33,7 +33,7 @@ let getDlls (path: string) =
             |> Seq.filter (fun dll -> not (isNull dll))
             |> Seq.distinct
             |> Seq.filter (fun dll -> not (isApiSet dll || isKnownDll dll || Seq.contains dll dllFilters))
-            |> Seq.filter (fun dll -> not (System.IO.File.Exists($@"{Directory.GetDirectoryRoot(path)}\{dll}")))
+            |> Seq.filter (fun dll -> not (System.IO.File.Exists($@"{Path.GetDirectoryName(path)}\{dll}")))
 
         dlls
     with _ ->
