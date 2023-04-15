@@ -1,5 +1,6 @@
 ﻿module Dll
 
+open System
 open System.IO
 open Microsoft.Win32
 open System.Security.AccessControl
@@ -64,3 +65,42 @@ let canWriteToDirectory (directory, user) =
     | :? System.UnauthorizedAccessException
     | :? System.InvalidCastException
     | :? System.ArgumentException as ex -> false
+
+let proxies : string[] = [||]
+
+let proxyReplace (exports: seq<PeNet.Header.Pe.ExportFunction>, path: string) =
+    Seq.map(fun (export:PeNet.Header.Pe.ExportFunction) ->
+        let formatted = $@"#pragma comment(linker,""/export:%s{export.Name}=%s{path}.%s{export.Name},@%d{export.Ordinal}"")"
+        formatted.Replace(@"\", @"\\").Replace(".dll", "")
+        ) exports
+let rec proxyDll (dll : string) =
+        let windowsPath = Path.Join(@"C:\Windows\", dll)
+        let system32Path = Path.Join(@"C:\Windows\System32", dll)
+        let sysWow64Path = Path.Join(@"C:\Windows\SysWOW64", dll)
+        let path = [windowsPath; system32Path; sysWow64Path] |> Seq.filter File.Exists
+        let path = Seq.head  path
+        let file = File.OpenRead(path)
+        let pe = PeNet.PeFile(file)
+        let exports = pe.ExportedFunctions |> Seq.filter (fun f -> f.HasName)
+        let exports = proxyReplace (exports, path) |> String.concat "\n"
+        let result = "#include <Windows.h>\n\n" +
+                        "\n" +
+                        "BOOL APIENTRY DllMain( HMODULE hModule,\n" +
+                        "                       DWORD  ul_reason_for_call,\n" +
+                        "                       LPVOID lpReserved\n" +
+                        "                     )\n" +
+                        "{\n" +
+                        "    switch (ul_reason_for_call)\n" +
+                        "    {\n" +
+                        "    case DLL_PROCESS_ATTACH:\n" +
+                        "    case DLL_THREAD_ATTACH:\n" +
+                        "    case DLL_THREAD_DETACH:\n" +
+                        "    case DLL_PROCESS_DETACH:\n" +
+                        "        break;\n" +
+                        "    }\n" +
+                        "    return TRUE;\n" +
+                        "}\n\n" +
+                        $"{exports}\n"
+        result
+
+

