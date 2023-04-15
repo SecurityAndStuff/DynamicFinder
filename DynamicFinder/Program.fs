@@ -76,23 +76,25 @@ let displayDlls path dlls =
         printfn $"[+] There are %d{Seq.length dlls} DLLs we can use for %s{path}"
 
     dlls |> Seq.iter (fun dll -> printfn $"\t- %s{dll}")
-   
+
 
 let mutable createdProxies = [||]
 
 let dlls = writableDirectories |> Seq.map Dll.getDlls
-               
+
 Seq.iter2 displayDlls writableDirectories dlls
 
-let createProxy = 
+let createProxy =
     if not (Directory.Exists("Output")) then
         Directory.CreateDirectory("Output") |> ignore
-        
+
     for dllFiles in dlls do
         for dll in dllFiles do
-            let filePath = Path.Join("Output", dll.Replace(".dll", ".c", StringComparison.OrdinalIgnoreCase))
+            let filePath =
+                Path.Join("Output", dll.Replace(".dll", ".c", StringComparison.OrdinalIgnoreCase))
+
             if not (createdProxies |> Seq.contains filePath) then
                 let result = Dll.proxyDll dll
                 File.WriteAllText(filePath, result)
-                createdProxies <- Array.append createdProxies [|filePath|]
+                createdProxies <- Array.append createdProxies [| filePath |]
                 printfn $"[*] Created proxy for %s{Path.GetFileName(filePath)}"
