@@ -11,7 +11,7 @@ let knownDlls =
 
     key.GetValueNames()
     |> Seq.map key.GetValue
-    |> Seq.map (fun (dll) -> (string dll).ToLower())
+    |> Seq.map (fun dll -> (string dll).ToLower())
 
 
 let getDlls (path: string) =
@@ -33,7 +33,7 @@ let getDlls (path: string) =
             |> Seq.filter (fun dll -> not (isNull dll))
             |> Seq.distinct
             |> Seq.filter (fun dll -> not (isApiSet dll || isKnownDll dll || Seq.contains dll dllFilters))
-            |> Seq.filter (fun dll -> not (System.IO.File.Exists($@"{Path.GetDirectoryName(path)}\{dll}")))
+            |> Seq.filter (fun dll -> not (File.Exists($@"{Path.GetDirectoryName(path)}\{dll}")))
 
         dlls
     with _ ->

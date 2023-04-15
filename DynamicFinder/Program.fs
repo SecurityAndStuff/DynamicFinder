@@ -1,5 +1,7 @@
 ﻿open System.Diagnostics
+open System.DirectoryServices.AccountManagement
 open System.IO
+open System.Management
 open System.ServiceProcess
 open System.Reflection
 
@@ -20,10 +22,36 @@ let user: string =
     match args.Length with
     | 0
     | 1 ->
-        printfn "Usage: %s [User|Administrators|System]" (Assembly.GetEntryAssembly().GetName().Name)
-        exit (1)
-    | _ -> args.[1].ToLower()
+        eprintfn $"Usage: %s{Assembly.GetEntryAssembly().GetName().Name} [User|Administrators|System]"
+        exit 1
+    | _ -> args[1].ToLower()
 
+let wmiSearch (query: string) =
+    let searcher = new ManagementObjectSearcher(query)
+    let search = searcher.Get()
+
+    seq
+        [| for result in search ->
+
+               result |]
+
+let allUsers = wmiSearch "SELECT * FROM Win32_UserAccount"
+
+let allGroups = wmiSearch "SELECT * FROM Win32_Group"
+
+if isNull (Principal.FindByIdentity(new PrincipalContext(ContextType.Machine), user)) then
+    eprintfn $"[*] '%s{args[1]}' was not found."
+    printfn "[*] Possible values for users are:"
+
+    for result in allUsers do
+        printfn "\t- %s" (string result["Name"])
+
+    printfn "[*] Possible values for groups are:"
+
+    for result in allGroups do
+        printfn "\t- %s" (string result["Name"])
+
+    exit 1
 
 printfn "[*] Running..."
 
@@ -40,14 +68,14 @@ let writableDirectories =
     runningFilenames
     |> Seq.filter (fun path -> Dll.canWriteToDirectory (Path.GetDirectoryName(path), user))
 
-printfn "%s" $"[*] There are {Seq.length writableDirectories} directories from running applications we can write to."
+printfn $"[*] There are %d{Seq.length writableDirectories} directories from running applications we can write to."
 
 let displayDlls path =
     let dlls = Dll.getDlls path
 
     if Seq.length dlls <> 0 then
-        printfn "%s" $"[+] There are {Seq.length dlls} DLLs we can use for {path}"
+        printfn $"[+] There are %d{Seq.length dlls} DLLs we can use for %s{path}"
 
-    dlls |> Seq.iter (fun dll -> printfn "%s" ($"\t- {dll}"))
+    dlls |> Seq.iter (fun dll -> printfn $"\t- %s{dll}")
 
 writableDirectories |> Seq.iter displayDlls

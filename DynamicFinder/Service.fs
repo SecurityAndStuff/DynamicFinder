@@ -13,9 +13,9 @@ let runningServices =
 
     let services =
         [ for service in searcher.Get() ->
-              { Name = string service.["Name"]
-                Path = string service.["PathName"]
-                StartName = string service.["StartName"] } ]
+              { Name = string service["Name"]
+                Path = string service["PathName"]
+                StartName = string service["StartName"] } ]
 
     services
     |> Seq.filter (fun svc -> Seq.length svc.Path <> 0 && not (svc.Path.Contains("svchost.exe -k")))
