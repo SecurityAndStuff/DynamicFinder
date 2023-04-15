@@ -22,7 +22,7 @@ let user: string =
     match args.Length with
     | 0
     | 1 ->
-        eprintfn $"Usage: %s{Assembly.GetEntryAssembly().GetName().Name} [User|Administrators|System]"
+        eprintfn $"Usage: %s{Assembly.GetEntryAssembly().GetName().Name} [User|Group]"
         exit 1
     | _ -> args[1].ToLower()
 
