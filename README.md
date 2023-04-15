@@ -3,6 +3,8 @@ A DLL sideloading utility.
 
 DynamicFinder will search every running process for DLL sideloading opportunities.
 
+Dynamic Finder will create proxy DLLs for any potencial targets.
+
 ```
 Usage: DynamicFinder [User|Group]
 PS C:\DynamicFinder> dotnet run Administrators
@@ -28,5 +30,37 @@ PS C:\DynamicFinder> dotnet run Users
         - dbghelp.dll
         - bcrypt.dll
 ```
+
+```
+[*] Created proxy for UIAutomationCore.c
+```
+
+```cpp
+// UIAutomationCore.c
+#include <Windows.h>
+
+
+BOOL APIENTRY DllMain( HMODULE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved
+                     )
+{
+    switch (ul_reason_for_call)
+    {
+    case DLL_PROCESS_ATTACH:
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
+}
+
+#pragma comment(linker,"/export:DllGetActivationFactory=C:\\Windows\\System32\\UIAutomationCore.DLL.DllGetActivationFactory,@1")
+#pragma comment(linker,"/export:DllCanUnloadNow=C:\\Windows\\System32\\UIAutomationCore.DLL.DllCanUnloadNow,@2")
+#pragma comment(linker,"/export:DllGetClassObject=C:\\Windows\\System32\\UIAutomationCore.DLL.DllGetClassObject,@3")
+// ...
+```
+
 
 This is a rewrite of a tool I'd previously written.
