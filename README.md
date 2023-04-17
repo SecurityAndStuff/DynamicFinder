@@ -7,15 +7,6 @@ Dynamic Finder will create proxy DLLs for any potencial targets.
 
 ```
 Usage: DynamicFinder [User|Group]
-PS C:\DynamicFinder> dotnet run Administrators
-[*] Running...
-[*] There are 96 directories from running applications we can write to.
-[+] There are 1 DLLs we can use for C:\Windows\system32\wbem\unsecapp.exe
-        - wbemcomn.dll
-[+] There are 2 DLLs we can use for C:\Windows\system32\wbem\wmiprvse.exe
-        - NCObjAPI.DLL
-        - wbemcomn.dll
-        
 PS C:\DynamicFinder> dotnet run Users
 [*] Running...
 [*] There are 2 directories from running applications we can write to.
