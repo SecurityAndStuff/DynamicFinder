@@ -62,9 +62,9 @@ let canWriteToDirectory (directory, user) =
             .Length
         <> 0
     with
-    | :? System.UnauthorizedAccessException
-    | :? System.InvalidCastException
-    | :? System.ArgumentException as ex -> false
+    | :? UnauthorizedAccessException
+    | :? InvalidCastException
+    | :? ArgumentException as ex -> false
 
 let proxies: string[] = [||]
 
