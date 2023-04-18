@@ -17,7 +17,7 @@ let printServices services =
     |> Seq.iter (printfn "%s")
 
 
-let args = System.Environment.GetCommandLineArgs()
+let args = Environment.GetCommandLineArgs()
 
 let user: string =
     match args.Length with
@@ -56,13 +56,10 @@ if isNull (Principal.FindByIdentity(new PrincipalContext(ContextType.Machine), u
 
 printfn "[*] Running..."
 
-let runningProcs = Proc.runningProcesses
-let runningSvcs = Service.runningServices
+let runningProcs = Proc.runningProcs
 
 let runningFilenames =
-    (Seq.concat
-        [ (runningProcs |> Seq.map Proc.ProcPath)
-          (runningSvcs |> Seq.map Service.servicePath) ])
+    runningProcs |> Seq.map (fun proc -> proc.Path)
     |> Seq.distinct
 
 let writableDirectories =

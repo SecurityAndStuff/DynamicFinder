@@ -6,17 +6,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Dll.fs"/>
-        <Compile Include="Proc.fs"/>
-        <Compile Include="Service.fs"/>
-        <Compile Include="Program.fs"/>
+        <Compile Include="Dll.fs" />
+        <Compile Include="Proc.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.1"/>
-        <PackageReference Include="PeNet" Version="3.0.0"/>
-        <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0"/>
-        <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.1" />
+        <PackageReference Include="PeNet" Version="3.0.0" />
+        <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+        <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.0" />
     </ItemGroup>
 
 </Project>

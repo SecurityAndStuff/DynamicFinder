@@ -3,15 +3,20 @@
 open System
 open System.Diagnostics
 open System.ComponentModel
+open System.Management
 
-let ProcPath (proc: Process) = proc.MainModule.FileName
+type Service =
+    { Name: string
+      Path: string
+      }
 
-let runningProcesses =
-    Process.GetProcesses()
-    |> Seq.filter (fun proc ->
-        try
+let runningProcs =
+    let query = "SELECT * FROM Win32_Process"
+    let searcher = new ManagementObjectSearcher(query)
 
-            not (isNull proc.MainModule.FileName)
-        with
-        | :? Win32Exception
-        | :? InvalidOperationException -> false)
+    let processes =
+        [ for service in searcher.Get() ->
+              { Name = string service["Name"]
+                Path = string service["ExecutablePath"]
+                } ]
+    processes
